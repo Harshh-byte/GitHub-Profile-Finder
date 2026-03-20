@@ -139,5 +139,12 @@ usernameinp.addEventListener("keypress", (e) => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
+  const footerText = document.querySelector("footer p");
+  if (footerText) {
+    footerText.textContent = footerText.textContent.replace(
+      "{currentYear}",
+      new Date().getFullYear(),
+    );
+  }
   loadUser("octocat");
 });
