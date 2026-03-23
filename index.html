@@ -3,118 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>GitHub Profile Finder</title>
+    <meta name="title" content="GitHub Profile Finder" />
+    <meta
+      name="description"
+      content="Search any GitHub username and get a crisp snapshot of profile details and recently updated repositories."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://github-profile-finder-hki0.onrender.com/" />
+    <meta
+      property="og:title"
+      content="GitHub Profile Finder"
+    />
+    <meta
+      property="og:description"
+      content="Search any GitHub username and get a crisp snapshot of profile details and recently updated repositories."
+    />
+    <meta
+      property="og:image"
+      content="/Assets/preview.jpg"
+    />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://github-profile-finder-hki0.onrender.com/" />
+    <meta
+      property="twitter:title"
+      content="GitHub Profile Finder"
+    />
+    <meta
+      property="twitter:description"
+      content="Search any GitHub username and get a crisp snapshot of profile details and recently updated repositories."
+    />
+    <meta
+      property="twitter:image"
+      content="/Assets/preview.jpg"
+    />
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/x-icon" href="github.svg" />
+    <link rel="icon" type="image/x-icon" href="/Assets/github.svg" />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@600;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root {
-        --ink: #0f172a;
-        --warm: #fff9f0;
-        --sun: #f59e0b;
-        --mint: #2dd4bf;
-        --line: rgba(15, 23, 42, 0.14);
-        --card: rgba(255, 255, 255, 0.76);
-      }
-
-      body {
-        font-family: "Space Grotesk", sans-serif;
-        color: var(--ink);
-        background:
-          radial-gradient(
-            circle at 8% 10%,
-            rgba(245, 158, 11, 0.28),
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 92% 4%,
-            rgba(45, 212, 191, 0.26),
-            transparent 36%
-          ),
-          linear-gradient(160deg, #f7f2e7 0%, #f7fbff 52%, #f0fdf8 100%);
-        min-height: 100vh;
-        overflow-x: hidden;
-      }
-
-      .hero-title {
-        font-family: "Sora", sans-serif;
-        letter-spacing: -0.02em;
-      }
-
-      .soft-card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.12);
-        backdrop-filter: blur(8px);
-      }
-
-      .grid-accent {
-        background-image:
-          linear-gradient(
-            to right,
-            rgba(15, 23, 42, 0.04) 1px,
-            transparent 1px
-          ),
-          linear-gradient(
-            to bottom,
-            rgba(15, 23, 42, 0.04) 1px,
-            transparent 1px
-          );
-        background-size: 24px 24px;
-      }
-
-      .reveal-up {
-        opacity: 0;
-        transform: translateY(18px);
-        animation: revealUp 0.7s ease forwards;
-      }
-
-      .reveal-delay-1 {
-        animation-delay: 0.1s;
-      }
-
-      .reveal-delay-2 {
-        animation-delay: 0.2s;
-      }
-
-      .pulse-ring::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: inherit;
-        border: 1px solid rgba(45, 212, 191, 0.45);
-        animation: pulseRing 2.6s ease-in-out infinite;
-        pointer-events: none;
-      }
-
-      @keyframes revealUp {
-        from {
-          opacity: 0;
-          transform: translateY(18px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes pulseRing {
-        0%,
-        100% {
-          opacity: 0.55;
-          transform: scale(1);
-        }
-
-        50% {
-          opacity: 0.1;
-          transform: scale(1.01);
-        }
-      }
-    </style>
   </head>
 
   <body class="grid-accent px-4 py-8 sm:px-6 sm:py-10 md:px-10 md:py-12">
