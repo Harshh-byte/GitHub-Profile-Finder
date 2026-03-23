@@ -3,6 +3,96 @@ let usernameinp = document.querySelector(".username-input");
 let card = document.querySelector(".card");
 let repoContainer = document.querySelector(".repo-container");
 
+function normalizeUrl(url) {
+  if (!url) return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+function truncateText(text, maxLength) {
+  if (!text) return "";
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
+}
+
+function getHostname(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./i, "");
+  } catch {
+    return url;
+  }
+}
+
+function fetchLinkPreview(url) {
+  const endpoint = `https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=false&meta=true`;
+  return fetch(endpoint)
+    .then((res) => {
+      if (!res.ok) throw new Error("Preview request failed.");
+      return res.json();
+    })
+    .then((payload) => {
+      if (payload.status !== "success" || !payload.data) {
+        throw new Error("Preview data unavailable.");
+      }
+
+      const data = payload.data;
+      return {
+        title: data.title || getHostname(url),
+        description: data.description || "No preview description available.",
+        image: data.image?.url || "",
+        publisher: data.publisher || getHostname(url),
+      };
+    });
+}
+
+function renderBlogPreview(blogUrl) {
+  const previewRoot = card.querySelector(".link-preview");
+  if (!previewRoot) return;
+
+  const linkEl = previewRoot.querySelector(".preview-link");
+  const titleEl = previewRoot.querySelector(".preview-title");
+  const descriptionEl = previewRoot.querySelector(".preview-description");
+  const urlEl = previewRoot.querySelector(".preview-url");
+  const imageWrapEl = previewRoot.querySelector(".preview-image-wrap");
+  const imageEl = previewRoot.querySelector(".preview-image");
+
+  const normalizedUrl = normalizeUrl(blogUrl);
+  if (!normalizedUrl) {
+    previewRoot.classList.add("hidden");
+    return;
+  }
+
+  linkEl.href = normalizedUrl;
+  previewRoot.classList.remove("hidden");
+
+  titleEl.textContent = "Loading link preview...";
+  descriptionEl.textContent = "Fetching metadata for this website.";
+  urlEl.textContent = getHostname(normalizedUrl);
+  imageWrapEl.classList.add("hidden");
+
+  fetchLinkPreview(normalizedUrl)
+    .then((preview) => {
+      titleEl.textContent = truncateText(preview.title, 80);
+      descriptionEl.textContent = truncateText(preview.description, 140);
+      urlEl.textContent = preview.publisher;
+
+      if (preview.image) {
+        imageEl.src = preview.image;
+        imageEl.alt = `${preview.title} preview`;
+        imageWrapEl.classList.remove("hidden");
+      } else {
+        imageWrapEl.classList.add("hidden");
+      }
+    })
+    .catch(() => {
+      titleEl.textContent = "Preview unavailable";
+      descriptionEl.textContent =
+        "We could not load metadata for this site, but you can still open the link.";
+      urlEl.textContent = getHostname(normalizedUrl);
+      imageWrapEl.classList.add("hidden");
+    });
+}
+
 function getProfileData(username) {
   return fetch(`https://api.github.com/users/${username}`).then((res) => {
     if (!res.ok) throw new Error("User not found.");
@@ -20,6 +110,8 @@ function getRepos(username) {
 }
 
 function decorateProfile(details) {
+  const normalizedBlog = normalizeUrl(details.blog);
+
   return `
     <div class="flex flex-col md:flex-row gap-8 items-center md:items-start w-full">
       <div class="shrink-0">
@@ -39,10 +131,27 @@ function decorateProfile(details) {
           <span class="flex items-center gap-1"><span class="text-lg">📍</span> ${details.location || "N/A"}</span>
           <span class="flex items-center gap-1"><span class="text-lg">🏢</span> ${details.company || "N/A"}</span>
           <span class="flex items-center gap-1"><span class="text-lg">🔗</span> 
-            <a href="${details.blog || "#"}" target="_blank" class="text-teal-600 hover:text-teal-700 hover:underline">
-              ${details.blog ? details.blog.replace(/^https?:\/\//, "") : "N/A"}
+            <a href="${normalizedBlog || "#"}" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 hover:underline">
+              ${normalizedBlog ? normalizedBlog.replace(/^https?:\/\//, "") : "N/A"}
             </a>
           </span>
+        </div>
+
+        <div class="link-preview hidden mt-6 w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-900/10 bg-white/90 shadow-[0_18px_45px_rgba(15,23,42,0.12)] mx-auto md:mx-0">
+          <a class="preview-link group block" href="#" target="_blank" rel="noopener noreferrer">
+            <div class="preview-image-wrap hidden relative w-full overflow-hidden bg-slate-100" style="aspect-ratio: 16 / 9;">
+              <img class="preview-image h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" alt="Preview image">
+              <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-900/45 to-transparent"></div>
+            </div>
+            <div class="min-w-0 px-4 py-4 sm:px-5 sm:py-5 text-left">
+              <p class="preview-url text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-700"></p>
+              <p class="preview-title mt-2 text-base sm:text-lg font-bold text-slate-900 leading-snug"></p>
+              <p class="preview-description mt-2 text-sm text-slate-600 leading-relaxed"></p>
+              <span class="mt-4 inline-flex items-center rounded-full border border-slate-900/10 bg-slate-900/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-700 transition group-hover:bg-slate-900 group-hover:text-white">
+                Open Website
+              </span>
+            </div>
+          </a>
         </div>
 
         <div class="flex flex-wrap justify-center md:justify-start gap-8 mt-6">
@@ -116,9 +225,10 @@ function loadUser(username) {
   Promise.all([getProfileData(username), getRepos(username)])
     .then(([profile, repos]) => {
       card.innerHTML = decorateProfile(profile);
+      renderBlogPreview(profile.blog);
 
       if (repos.length > 0) {
-        decorateRepos(repos);
+        repoContainer.innerHTML = decorateRepos(repos);
         repoContainer.classList.remove("hidden");
       }
     })
